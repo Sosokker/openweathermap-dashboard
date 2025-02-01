@@ -1,0 +1,57 @@
+#main-section {
+    display: flex;
+    flex-direction: row;
+    margin: 2.5rem
+}
+
+#statistic {
+    flex: 1;
+    min-width: 300px;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    text-align: center;
+}
+
+#table-section {
+    overflow-x: auto;
+}
+
+#map {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    flex: 2;
+    min-width: 600px;
+}
+
+
+// from https://codepen.io/zass-udd/pen/NWqKmdE
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+td, th {
+  border: 1px solid #dddddd;
+  text-align: center;
+  padding:6px 20px;
+}
+tr th {
+ border: 1px solid #dddddd;
+  text-align: center;
+  padding:6px 20px;
+  background-color: #ad1e23;
+  color:#fff;
+}
+
+tr:hover {
+  background-color: #dddddd;
+  cursor: pointer;
+}
+
+.content td, .content th {
+    border-top: 1px solid transparent;
+    padding: 2px 10px 2px 15px;
+}
