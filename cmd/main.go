@@ -131,10 +131,16 @@ func readCoordData(filepath string, coordCh chan<- Coordinate) {
 	close(coordCh)
 }
 
+// https://www.stackhawk.com/blog/golang-cors-guide-what-it-is-and-how-to-enable-it/
+func enableCors(w *http.ResponseWriter) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+}
+
 // lat, lon, rain+place
 // state-id, rainfall (scale 100)
 
 func rawDataHandler(w http.ResponseWriter, r *http.Request) {
+	enableCors(&w)
 	apiKey := loadEnv()
 
 	coordCh := make(chan Coordinate)
