@@ -31,7 +31,7 @@ type DataEntry struct {
 	Coord   Coordinate `json:"coord"`
 	Weather []Weather  `json:"weather"`
 	Rain    struct {
-		PerHour float64 `json:"1h"`
+		PerHour float32 `json:"1h"`
 	} `json:"rain"`
 }
 
@@ -45,6 +45,13 @@ func (w Weather) String() string {
 
 func (d DataEntry) String() string {
 	return fmt.Sprintf("Place Name: %s\nCoordinate: %s\nWeather: %s\nRain per Hour: %f\n", d.Name, d.Coord, d.Weather, d.Rain.PerHour)
+}
+
+func (d *DataEntry) normalizeRainPerHour(min, max float32) {
+	if max == 0 {
+		return
+	}
+	d.Rain.PerHour = (float32(d.Rain.PerHour) - min) / (max - min) * 100
 }
 
 func loadEnv() string {
@@ -124,14 +131,44 @@ func readCoordData(filepath string, coordCh chan<- Coordinate) {
 	close(coordCh)
 }
 
-func main() {
+// lat, lon, rain+place
+// state-id, rainfall (scale 100)
+
+func rawDataHandler(w http.ResponseWriter, r *http.Request) {
 	apiKey := loadEnv()
 
 	coordCh := make(chan Coordinate)
 	go readCoordData("data/test.csv", coordCh)
 
+	var max float32 = 0.0
+	var min float32 = 10000000.0
+
+	item := strings.TrimSpace(r.URL.Query().Get("scale"))
+	scale, _ := strconv.ParseBool(item)
+
+	var entries []DataEntry
 	for coord := range coordCh {
 		entry := fetchWeatherData(coord.Lat, coord.Lon, apiKey)
-		fmt.Println(entry)
+		if entry.Rain.PerHour > max {
+			max = entry.Rain.PerHour
+		}
+		if entry.Rain.PerHour < min {
+			min = entry.Rain.PerHour
+		}
+
+		if scale {
+			entry.normalizeRainPerHour(min, max)
+		}
+		entries = append(entries, entry)
 	}
+
+	if err := json.NewEncoder(w).Encode(&entries); err != nil {
+		http.Error(w, "Failed to encode JSON", http.StatusInternalServerError)
+		return
+	}
+}
+
+func main() {
+	http.HandleFunc("/api/data", rawDataHandler) // /api/data?scale=100
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }
