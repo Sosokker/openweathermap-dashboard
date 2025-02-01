@@ -15,7 +15,7 @@ import (
 )
 
 type Coordinate struct {
-	Place string  `json:"-"`
+	Place string  `json:"place"`
 	Lon   float32 `json:"lon"`
 	Lat   float32 `json:"lat"`
 }
@@ -33,10 +33,11 @@ type DataEntry struct {
 	Rain    struct {
 		PerHour float32 `json:"1h"`
 	} `json:"rain"`
+	State string `json:"state,omitempty"`
 }
 
 func (c Coordinate) String() string {
-	return fmt.Sprintf("(%f, %f)", c.Lat, c.Lon)
+	return fmt.Sprintf("(%f, %f, %s)", c.Lat, c.Lon, c.Place)
 }
 
 func (w Weather) String() string {
@@ -144,7 +145,7 @@ func rawDataHandler(w http.ResponseWriter, r *http.Request) {
 	apiKey := loadEnv()
 
 	coordCh := make(chan Coordinate)
-	go readCoordData("data/test.csv", coordCh)
+	go readCoordData("data/data.csv", coordCh)
 
 	var max float32 = 0.0
 	var min float32 = 10000000.0
@@ -154,7 +155,9 @@ func rawDataHandler(w http.ResponseWriter, r *http.Request) {
 
 	var entries []DataEntry
 	for coord := range coordCh {
+
 		entry := fetchWeatherData(coord.Lat, coord.Lon, apiKey)
+		entry.Coord.Place = coord.Place // fetched data not have place field
 		if entry.Rain.PerHour > max {
 			max = entry.Rain.PerHour
 		}
