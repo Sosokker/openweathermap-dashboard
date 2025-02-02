@@ -1,0 +1,24 @@
+services:
+  backend:
+    container_name: backend
+    build: ./cmd
+    networks:
+      - internal-net
+    environment:
+      - OPENWEATHERMAP_API_KEY=34fec0bf50b5e8cc6c2070005ea3d5b0
+
+  nginx:
+    build: 
+      context: nginx
+    container_name: nginx
+    volumes: 
+      - ./nginx:/etc/nginx/conf.d/
+    networks: 
+      - internal-net
+    ports: 
+      - "8080:80"
+    depends_on:
+      - backend
+
+networks:
+  internal-net:
