@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/joho/godotenv"
+	"github.com/rs/cors"
 )
 
 type Coordinate struct {
@@ -56,15 +56,8 @@ func (d *DataEntry) normalizeRainPerHour(min, max float32) {
 }
 
 func loadEnv() string {
-	apiKeys, err := godotenv.Read()
-	if err != nil {
-		log.Fatalln("Error: can't load environment or .env file")
-	}
+	apiKey := os.Getenv("OPENWEATHERMAP_API_KEY")
 
-	apiKey, exist := apiKeys["OPENWEATHERMAP_API_KEY"]
-	if !exist {
-		log.Fatalln("Error: OPENWEATHERMAP_API_KEY does not existed!")
-	}
 	if strings.TrimSpace(apiKey) == "" {
 		log.Fatalln("Error: OPENWEATHERMAP_API_KEY can't be empty!")
 	}
@@ -132,20 +125,14 @@ func readCoordData(filepath string, coordCh chan<- Coordinate) {
 	close(coordCh)
 }
 
-// https://www.stackhawk.com/blog/golang-cors-guide-what-it-is-and-how-to-enable-it/
-func enableCors(w *http.ResponseWriter) {
-	(*w).Header().Set("Access-Control-Allow-Origin", "*")
-}
-
 // lat, lon, rain+place
 // state-id, rainfall (scale 100)
 
 func rawDataHandler(w http.ResponseWriter, r *http.Request) {
-	enableCors(&w)
 	apiKey := loadEnv()
 
 	coordCh := make(chan Coordinate)
-	go readCoordData("data/data.csv", coordCh)
+	go readCoordData("data/test.csv", coordCh)
 
 	var max float32 = 0.0
 	var min float32 = 10000000.0
@@ -178,6 +165,17 @@ func rawDataHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	http.HandleFunc("/api/data", rawDataHandler) // /api/data?scale=100
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	// https://www.stackhawk.com/blog/golang-cors-guide-what-it-is-and-how-to-enable-it/
+	mux := http.NewServeMux()
+	mux.HandleFunc("/api/data", rawDataHandler) // /api/data?scale=100
+
+	handler := cors.Default().Handler(mux)
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowCredentials: true,
+		AllowedHeaders:   []string{"Authorization", "Content-Type", "Access-Control-Allow-Origin"},
+		AllowedMethods:   []string{"GET", "UPDATE", "PUT", "POST", "DELETE"},
+	})
+	handler = c.Handler(handler)
+	log.Fatal(http.ListenAndServe(":8080", handler))
 }
