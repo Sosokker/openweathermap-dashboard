@@ -12,11 +12,13 @@
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     padding: 1.5rem;
     text-align: center;
+    max-height: 650px;
 }
 
 #table-section {
     overflow-x: auto;
     overflow-y: auto;
+    max-height: 500px;
 }
 
 #map {

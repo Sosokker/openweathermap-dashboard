@@ -40,7 +40,7 @@
             }
         </script>
         <div id="statistic">
-            <h2>Rainfall Statistics</h2>
+            <h2>Rainfall Statistics | Rain map</h2>
             <p>Today rain/hr.</p>
             <div id="table-section">
                 <script>
@@ -104,7 +104,7 @@
                         const lat = weatherData.map((location) => location.coord.lat);
                         const text = weatherData.map(
                             (location) =>
-                                `${location.name}: ${location.rain["1h"]} mm/hr (${location.weather[0].description})`
+                                `${location.name}: ${location.rain["1h"]} mm/hr)`
                         );
 
                         const data = [
