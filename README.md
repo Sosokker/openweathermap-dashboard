@@ -7,6 +7,10 @@
 - [Openweather](https://openweathermap.org/) API Key
 
 
+1. Go to `docker-compose.yml` and fill Openweathermap API Key
+
+2. Run compose up
+
 ```bash
 docker compose up --build --remove-orphans --force-recreate
 ```

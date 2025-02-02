@@ -188,12 +188,12 @@ func main() {
 	mux.HandleFunc("/api/data", rawDataHandler) // /api/data?scale=100
 
 	handler := cors.Default().Handler(mux)
-	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"*"},
-		AllowCredentials: true,
-		AllowedHeaders:   []string{"Authorization", "Content-Type", "Access-Control-Allow-Origin"},
-		AllowedMethods:   []string{"GET", "UPDATE", "PUT", "POST", "DELETE"},
-	})
-	handler = c.Handler(handler)
+	// c := cors.New(cors.Options{
+	// 	AllowedOrigins:   []string{"*"},
+	// 	AllowCredentials: true,
+	// 	AllowedHeaders:   []string{"Authorization", "Content-Type", "Access-Control-Allow-Origin"},
+	// 	AllowedMethods:   []string{"GET", "UPDATE", "PUT", "POST", "DELETE"},
+	// })
+	// handler = c.Handler(handler)
 	log.Fatal(http.ListenAndServe(":8080", handler))
 }

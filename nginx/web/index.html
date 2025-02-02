@@ -68,8 +68,8 @@
                                 tableHTML += `
                                 <tr>
                                     <td>${data.name || "N/A"}</td>
-                                    <td>${data.lat || 0}</td>
-                                    <td>${data.lon || 0}</td>
+                                    <td>${data.coord.lat || 0}</td>
+                                    <td>${data.coord.lon || 0}</td>
                                     <td>${data.rain["1h"] || "N/A"}</td>
                                 </tr>`;
                             });

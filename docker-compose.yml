@@ -5,7 +5,7 @@ services:
     networks:
       - internal-net
     environment:
-      - OPENWEATHERMAP_API_KEY=34fec0bf50b5e8cc6c2070005ea3d5b0
+      - OPENWEATHERMAP_API_KEY=fillme
 
   nginx:
     build: 
