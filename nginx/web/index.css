@@ -16,6 +16,7 @@
 
 #table-section {
     overflow-x: auto;
+    overflow-y: auto;
 }
 
 #map {

@@ -22,97 +22,76 @@
 
 <body>
     <div id="main-section">
+        <script>
+            async function fetchData(scale) {
+                let url = "http://localhost:8080/api/data";
+                if (scale === true) {
+                    url += "?scale=true"
+                }
+
+                try {
+                    const res = await fetch(url)
+                    const weatherData = await res.json()
+                    return weatherData
+                } catch {
+                    console.error(error)
+                    return null
+                }
+            }
+        </script>
         <div id="statistic">
             <h2>Rainfall Statistics</h2>
             <p>Today rain/hr.</p>
             <div id="table-section">
-                <table>
-                    <tbody>
-                        <tr>
-                            <th rowspan="2"><strong>Location</strong></th>
-                            <th colspan="2"><strong>Coordinate</strong></th>
-                            <th rowspan="2"><strong>Rain Per Hour</strong></th>
-                        </tr>
-                        <tr>
-                            <th>Latitude</th>
-                            <th>Longitude</th>
-                        </tr>
-                        <tr>
-                            <td>8</td>
-                            <td>0.395</td>
-                            <td>±8</td>
-                            <td>50.27</td>
-                        </tr>
-                        <tr>
-                            <td>10</td>
-                            <td>0.617</td>
-                            <td>±6</td>
-                            <td>78.54</td>
-                        </tr>
-                        <tr>
-                            <td>12</td>
-                            <td>0.888</td>
-                            <td>±6</td>
-                            <td>113.10</td>
-                        </tr>
-                        <tr>
-                            <td>16</td>
-                            <td>1.580</td>
-                            <td>±5</td>
-                            <td>201.06</td>
-                        </tr>
-                        <tr>
-                            <td>20</td>
-                            <td>2.470</td>
-                            <td>±5</td>
-                            <td>314.16</td>
-                        </tr>
-                        <tr>
-                            <td>22</td>
-                            <td>2.984</td>
-                            <td>±4</td>
-                            <td>380.13</td>
-                        </tr>
-                        <tr>
-                            <td>25</td>
-                            <td>3.850</td>
-                            <td>±4</td>
-                            <td>490.88</td>
-                        </tr>
-                        <tr>
-                            <td>28</td>
-                            <td>4.840</td>
-                            <td>±4</td>
-                            <td>615.75</td>
-                        </tr>
-                        <tr>
-                            <td>32</td>
-                            <td>6.310</td>
-                            <td>±4</td>
-                            <td>804.25</td>
-                        </tr>
-                    </tbody>
-                </table>
+                <script>
+                    async function renderTable() {
+                        const res = fetchData(false);
+                        res.then((weatherData) => {
+
+                            let tableHTML = `
+                            <table border="1">
+                                <thead>
+                                    <tr>
+                                        <th rowspan="2"><strong>Location</strong></th>  
+                                        <th colspan="2"><strong>Coordinate</strong></th>  
+                                        <th rowspan="2"><strong>Rain Per Hour</strong></th>  
+                                    </tr>
+                                    <tr>
+                                        <th>Latitude</th>
+                                        <th>Longitude</th>
+                                    </tr>
+                                </thead>
+                                <tbody>`;
+
+                            weatherData.forEach((data) => {
+                                console.log(data)
+                                tableHTML += `
+                                <tr>
+                                    <td>${data.name || "N/A"}</td>
+                                    <td>${data.lat || 0}</td>
+                                    <td>${data.lon || 0}</td>
+                                    <td>${data.rain["1h"] || "N/A"}</td>
+                                </tr>`;
+                            });
+
+                            tableHTML += `
+                                </tbody>
+                            </table>`;
+
+
+                            const d = document.getElementById("table-section")
+                            d.innerHTML = tableHTML
+                        }).catch((error) => {
+                            const tableHTML = "<p>table not availaible</p>"
+                            const d = document.getElementById("table-section")
+                            d.innerHTML = tableHTML
+                        })
+                    }
+                    renderTable();
+                </script>
             </div>
         </div>
         <div id="map">
-            <script>
-                async function fetchData(scale) {
-                    let url = "http://localhost:8080/api/data";
-                    if (scale === true) {
-                        url += "?scale=true"
-                    }
-
-                    try {
-                        const res = await fetch(url)
-                        const weatherData = await res.json()
-                        return weatherData
-                    } catch {
-                        console.error(error)
-                        return null
-                    }
-                }
-            </script>
             <div id="rain-marker">
                 <script>
                     async function updateRainMarker() {
