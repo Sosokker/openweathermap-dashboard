@@ -10,9 +10,18 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
+	"github.com/patrickmn/go-cache"
 	"github.com/rs/cors"
 )
+
+var c *cache.Cache
+
+func init() {
+	c = cache.New(30*time.Minute, 60*time.Minute)
+	// c.Set("coordinate", "entry", cache.DefaultExpiration)
+}
 
 type Coordinate struct {
 	Place string  `json:"place"`
@@ -67,6 +76,12 @@ func loadEnv() string {
 // Fetch weather data with specific latitude and longitude and decode into struct
 func fetchWeatherData(lat, lon float32, apiKey string) DataEntry {
 	var url = fmt.Sprintf("https://api.openweathermap.org/data/2.5/weather?lat=%f&lon=%f&appid=%s", lat, lon, strings.TrimSpace(apiKey))
+
+	coordstr := fmt.Sprintf("%f, %f", lat, lon)
+	if data, found := c.Get(coordstr); found {
+		return data.(DataEntry)
+	}
+
 	fmt.Println(url)
 	resp, err := http.Get(url)
 	if err != nil {
@@ -84,6 +99,9 @@ func fetchWeatherData(lat, lon float32, apiKey string) DataEntry {
 	if err != nil {
 		log.Fatalln("Error: error decode json to struct", err)
 	}
+
+	// cache
+	c.Set(coordstr, entry, cache.DefaultExpiration)
 
 	return entry
 }
@@ -132,7 +150,7 @@ func rawDataHandler(w http.ResponseWriter, r *http.Request) {
 	apiKey := loadEnv()
 
 	coordCh := make(chan Coordinate)
-	go readCoordData("data/test.csv", coordCh)
+	go readCoordData("data/data.csv", coordCh)
 
 	var max float32 = 0.0
 	var min float32 = 10000000.0
